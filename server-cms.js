@@ -59,10 +59,10 @@ const menu = () => {
                     viewEmployees();
                     break;
                 case "Add a Department":
-                    // Call the function
+                    addDepartment();
                     break;
                 case "Add a Role":
-                    // Call the function
+                    addRole();
                     break;
                 case "Add an Employee":
                     // Call the function
@@ -97,20 +97,20 @@ const pauseMenu = () => {
         })
 };
 
-// Function to view all roles
-const viewRoles = () => {
-    const query = "SELECT * FROM role";
-    connection.query(query, (err, res) => {
-        console.table('Company Roles:', res);
-        pauseMenu();
-    });
-};
-
 // Function to view all departments
 const viewDepartments = () => {
     const query = "SELECT * FROM department";
     connection.query(query, (err, res) => {
         console.table('Company Departments:', res);
+        pauseMenu();
+    });
+};
+
+// Function to view all roles
+const viewRoles = () => {
+    const query = "SELECT * FROM role";
+    connection.query(query, (err, res) => {
+        console.table('Company Roles:', res);
         pauseMenu();
     });
 };
@@ -124,11 +124,98 @@ const viewEmployees = () => {
     });
 };
 
-// Function to add a role
-
-
 // Function to add a department
+const addDepartment = () => {
+    // Prompt for department information
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: 'Enter Name of New Department:',
+                name: 'department',
+            },
+        ])
+        .then((response) => {
+            // Make sure this department doesn't already exist
+            const query = "SELECT * FROM department WHERE name = (?);";
+            connection.query(query, response.department, (err, res) => {
+                if (err) throw err;
+                if (res[0]) {
+                    console.log(`Department ${response.department} already exists`);
+                    viewDepartments();
+                } else {
+                    const query = "INSERT INTO department (name) VALUES (?);";
+                    connection.query(query, response.department, (err, res) => {
+                        if (err) throw err;
+                        console.log(`Department ${response.department} Added`);
+                        viewDepartments();
+                    });
 
+                }
+
+
+            });
+        });
+};
+
+// Function to add a role
+const addRole = () => {
+    // Store current departments
+    let currentDepartments = [];
+    connection.query("SELECT name FROM department;", (err, res) => {
+        if (err) throw err;
+        currentDepartments = res;
+    });
+    // Prompt for role information
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: 'Enter Title of New Role:',
+                name: 'title',
+            },
+        ])
+        .then((response) => {
+            // Make sure this role doesn't already exist
+            const query = "SELECT * FROM role WHERE title = (?);";
+            connection.query(query, response.title, (err, res) => {
+                if (err) throw err;
+                if (res[0]) {
+                    console.log(`Role of ${response.title} already exists`);
+                    viewRoles();
+                } else {
+                    // Ask for other role information
+                    inquirer
+                        .prompt([
+                            {
+                                type: 'number',
+                                message: `Enter ${response.title} Salary:`,
+                                name: 'salary',
+                            },
+                            {
+                                type: 'list',
+                                message: `Choose the Department for ${response.title}:`,
+                                choices: currentDepartments,
+                                name: 'department',
+                            },
+                        ])
+                        .then((secondResponse) => {
+                            // Get the id for the chosen department
+                            connection.query("SELECT id FROM department WHERE name = ?;", secondResponse.department, (err, res2) => {
+                                if (err) throw err;
+                                // Add this role to the database
+                                const query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+                                connection.query(query, [response.title, secondResponse.salary, res2[0].id], (err, res) => {
+                                    if (err) throw err;
+                                    console.log(`Role ${response.title} Added`);
+                                    viewRoles();
+                                })
+                            });
+                        })
+                };
+            });
+        });
+};
 
 // Function to add an employee
 
