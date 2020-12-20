@@ -50,13 +50,13 @@ const menu = () => {
             // Choose which class to call depending on the employee's role
             switch (response.choice) {
                 case "View Departments":
-                    // Call the function
+                    viewDepartments();
                     break;
                 case "View Roles":
                     viewRoles();
                     break;
                 case "View Employees":
-                    // Call the function
+                    viewEmployees();
                     break;
                 case "Add a Department":
                     // Call the function
@@ -107,10 +107,22 @@ const viewRoles = () => {
 };
 
 // Function to view all departments
-
+const viewDepartments = () => {
+    const query = "SELECT * FROM department";
+    connection.query(query, (err, res) => {
+        console.table('Company Departments:', res);
+        pauseMenu();
+    });
+};
 
 // Function to view all employees
-
+const viewEmployees = () => {
+    const query = "SELECT * FROM employee";
+    connection.query(query, (err, res) => {
+        console.table('Company Employees:', res);
+        pauseMenu();
+    });
+};
 
 // Function to add a role
 
