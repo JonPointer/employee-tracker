@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const logo = require('asciiart-logo');
+const cTable = require('console.table');
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -12,6 +13,8 @@ const connection = mysql.createConnection({
 
 // Function to display company header with each menu
 const menuHeader = () => {
+    // Clear the console
+    console.clear();
     console.log(
         logo({
             name: 'Hughes Drill Bits Co.',
@@ -98,15 +101,10 @@ const pauseMenu = () => {
 const viewRoles = () => {
     const query = "SELECT * FROM role";
     connection.query(query, (err, res) => {
-        res.forEach(({ id, title, salary, department_id }) => {
-            console.log(
-                `ID: ${id} || Title: ${title} || Salary: ${salary} || Department ID: ${department_id}`
-            );
-        });
+        console.table('Company Roles:', res);
         pauseMenu();
     });
-
-}
+};
 
 // Function to view all departments
 
@@ -131,7 +129,6 @@ const viewRoles = () => {
 connection.connect((err) => {
     if (err) throw err;
     console.log(`connected as id ${connection.threadId}\n`);
-    console.clear();
     // Call the company header
     menuHeader();
     // Call the system menu
