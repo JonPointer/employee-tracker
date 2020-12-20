@@ -29,15 +29,16 @@ const menuHeader = () => {
 }
 
 const menu = () => {
-    // Call the company header
-    menuHeader();
     // Utilize inquirer to display the menu choices
     inquirer
         .prompt([
             {
                 type: 'list',
                 message: 'Choose a function to perform:',
-                choices: ["View Departments", "View Roles", "View Employees"],
+                choices: [new inquirer.Separator('---- View a Database Table ----'), "View Departments", "View Roles", "View Employees",
+                new inquirer.Separator('---- Add to a Database Table ----'), "Add a Department", "Add a Role", "Add an Employee",
+                new inquirer.Separator('---- Update a Database Table ----'), "Update an employee's role",
+                new inquirer.Separator('---- Exit ----'), "Exit"],
                 name: 'choice',
             },
 
@@ -49,17 +50,69 @@ const menu = () => {
                     // Call the function
                     break;
                 case "View Roles":
-                    // Call the function
+                    viewRoles();
                     break;
                 case "View Employees":
                     // Call the function
                     break;
+                case "Add a Department":
+                    // Call the function
+                    break;
+                case "Add a Role":
+                    // Call the function
+                    break;
+                case "Add an Employee":
+                    // Call the function
+                    break;
+                case "Update an employee's role":
+                    // Call the function
+                    break;
+                case "Exit":
+                    // Exit from the program
+                    process.exit();
+                    break;
                 default:
                     break;
             }
-            menu();
         })
 }
+
+// Function to pause for input and then call top menu
+const pauseMenu = () => {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: 'Hit Enter to Continue',
+                name: 'continue',
+            },
+        ])
+        .then((response) => {
+            console.clear();
+            menuHeader();
+            menu();
+        })
+};
+
+// Function to view all roles
+const viewRoles = () => {
+    const query = "SELECT * FROM role";
+    connection.query(query, (err, res) => {
+        res.forEach(({ id, title, salary, department_id }) => {
+            console.log(
+                `ID: ${id} || Title: ${title} || Salary: ${salary} || Department ID: ${department_id}`
+            );
+        });
+        pauseMenu();
+    });
+
+}
+
+// Function to view all departments
+
+
+// Function to view all employees
+
 
 // Function to add a role
 
@@ -70,32 +123,17 @@ const menu = () => {
 // Function to add an employee
 
 
-// Function to view all roles
-
-
-// Function to view all departments
-
-
-// Function to view all employees
-
-
 // Function to update employee roles
 
 
-// const displayRoles = () => {
-//     const query = "SELECT * FROM role";
-//     connection.query(query, (err, res) => {
-//         res.forEach(({ id, title, salary, department_id }) => {
-//             console.log(
-//                 `ID: ${id} || Title: ${title} || Salary: ${salary} || Department ID: ${department_id}`
-//             );
-//         });
-//     });
-// }
 
 // Make connection and display menu
 connection.connect((err) => {
     if (err) throw err;
     console.log(`connected as id ${connection.threadId}\n`);
+    console.clear();
+    // Call the company header
+    menuHeader();
+    // Call the system menu
     menu();
 });
