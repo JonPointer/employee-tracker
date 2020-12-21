@@ -68,7 +68,7 @@ const menu = () => {
                     addEmployee();
                     break;
                 case "Update an employee's role":
-                    // Call the function
+                    updateEmployeeRole();
                     break;
                 case "Exit":
                     // Exit from the program
@@ -170,72 +170,122 @@ const addRole = () => {
     connection.query("SELECT name FROM department;", (err, res) => {
         if (err) throw err;
         currentDepartments = res;
-    });
-    // Prompt for role information
-    inquirer
-        .prompt([
-            {
-                type: 'input',
-                message: 'Enter Title of New Role:',
-                name: 'title',
-            },
-        ])
-        .then((response) => {
-            // Make sure this role doesn't already exist
-            const query = "SELECT * FROM role WHERE title = (?);";
-            connection.query(query, response.title, (err, res) => {
-                if (err) throw err;
-                if (res[0]) {
-                    console.log(`Role of ${response.title} already exists`);
-                    viewRoles();
-                } else {
-                    // Ask for other role information
-                    inquirer
-                        .prompt([
-                            {
-                                type: 'number',
-                                message: `Enter ${response.title} Salary:`,
-                                name: 'salary',
-                            },
-                            {
-                                type: 'list',
-                                message: `Choose the Department for ${response.title}:`,
-                                choices: currentDepartments,
-                                name: 'department',
-                            },
-                        ])
-                        .then((secondResponse) => {
-                            // Get the id for the chosen department
-                            connection.query("SELECT id FROM department WHERE name = ?;", secondResponse.department, (err, res2) => {
-                                if (err) throw err;
-                                // Add this role to the database
-                                const query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
-                                connection.query(query, [response.title, secondResponse.salary, res2[0].id], (err, res) => {
+        // Prompt for role information
+        inquirer
+            .prompt([
+                {
+                    type: 'input',
+                    message: 'Enter Title of New Role:',
+                    name: 'title',
+                },
+            ])
+            .then((response) => {
+                // Make sure this role doesn't already exist
+                const query = "SELECT * FROM role WHERE title = (?);";
+                connection.query(query, response.title, (err, res) => {
+                    if (err) throw err;
+                    if (res[0]) {
+                        console.log(`Role of ${response.title} already exists`);
+                        viewRoles();
+                    } else {
+                        // Ask for other role information
+                        inquirer
+                            .prompt([
+                                {
+                                    type: 'number',
+                                    message: `Enter ${response.title} Salary:`,
+                                    name: 'salary',
+                                },
+                                {
+                                    type: 'list',
+                                    message: `Choose the Department for ${response.title}:`,
+                                    choices: currentDepartments,
+                                    name: 'department',
+                                },
+                            ])
+                            .then((secondResponse) => {
+                                // Get the id for the chosen department
+                                connection.query("SELECT id FROM department WHERE name = ?;", secondResponse.department, (err, res2) => {
                                     if (err) throw err;
-                                    console.log(`Role ${response.title} Added`);
-                                    viewRoles();
-                                })
-                            });
-                        })
-                };
+                                    // Add this role to the database
+                                    const query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+                                    connection.query(query, [response.title, secondResponse.salary, res2[0].id], (err, res) => {
+                                        if (err) throw err;
+                                        console.log(`Role ${response.title} Added`);
+                                        viewRoles();
+                                    })
+                                });
+                            })
+                    };
+                });
             });
-        });
+    });
 };
 
 // Function to add an employee
 const addEmployee = () => {
     // Get list of current roles
-    // Get list of current employees for managers - start with none
-    // Ask for first and last name
-    // Pick from list for role title
-    // Pick from list for manager name
-    // Get the role title id
-    // Get the manager employee id
-    // Add this record to the employee table
+    let currentRoles = [];
+    connection.query("SELECT title as 'name' FROM role;", (err, res) => {
+        if (err) throw err;
+        currentRoles = res;
+        // Get list of current employees for managers - start with none
+        let currentEmployees = [];
+        connection.query("SELECT CONCAT(first_name, ' ',last_name) as name FROM employee;", (err, res2) => {
+            if (err) throw err;
+            currentEmployees = res2;
+            // Prompt for input on new employee
+            inquirer
+                .prompt([
+                    {
+                        type: 'input',
+                        message: 'Enter First Name:',
+                        name: 'first',
+                    },
+                    {
+                        type: 'input',
+                        message: 'Enter Last Name:',
+                        name: 'last',
+                    },
+                    {
+                        type: 'list',
+                        message: `Select their Role:`,
+                        choices: currentRoles,
+                        name: 'role',
+                    },
+                    {
+                        type: 'list',
+                        message: `Select their Manager:`,
+                        choices: currentEmployees,
+                        name: 'manager',
+                    },
+                ])
+                .then((response) => {
+                    // Get the id for the chosen role
+                    connection.query("SELECT id FROM role WHERE title = ?;", response.role, (err, res3) => {
+                        if (err) throw err;
+                        // Get the id for the chosen manager
+                        connection.query("SELECT id FROM employee WHERE CONCAT(first_name, ' ',last_name) = ?;", response.manager, (err, res4) => {
+                            if (err) throw err;
+                            // Add this employee to the database
+                            const query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+                            connection.query(query, [response.first, response.last, res3[0].id, res4[0].id], (err, res) => {
+                                if (err) throw err;
+                                console.log(`Employee Added`);
+                                viewEmployees();
+                            })
+                        });
+
+                    });
+                })
+        });
+    });
 }
 
 // Function to update employee roles
+const updateEmployeeRole = () => {
 
+}
 
 
 // Make connection and display menu
