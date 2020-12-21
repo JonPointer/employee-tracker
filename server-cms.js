@@ -43,6 +43,7 @@ const menu = () => {
                 new inquirer.Separator('---- Update a Database Table ----'), "Update an employee's role",
                 new inquirer.Separator('---- Exit ----'), "Exit"],
                 name: 'choice',
+                pageSize: 12,
             },
 
         ])
@@ -284,7 +285,57 @@ const addEmployee = () => {
 
 // Function to update employee roles
 const updateEmployeeRole = () => {
+    // Get list of current employees
+    let currentEmployees = [];
+    connection.query("SELECT CONCAT(first_name, ' ',last_name) as name FROM employee;", (err, res) => {
+        if (err) throw err;
+        currentEmployees = res;
+        // Get list of current roles
+        let currentRoles = [];
+        connection.query("SELECT title as 'name' FROM role;", (err, res2) => {
+            if (err) throw err;
+            currentRoles = res2;
+            // Prompt for employee to change and their new role
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        message: `Employee to modify:`,
+                        choices: currentEmployees,
+                        name: 'employee',
+                    },
+                    {
+                        type: 'list',
+                        message: `Select their new Role:`,
+                        choices: currentRoles,
+                        name: 'role',
+                    },
 
+                ])
+                .then((response) => {
+                    // Get the id for the chosen role
+                    connection.query("SELECT id FROM role WHERE title = ?;", response.role, (err, res3) => {
+                        if (err) throw err;
+                        // Update the specified employee with this role
+                        connection.query("UPDATE employee SET role_id = ? WHERE CONCAT(first_name, ' ',last_name) = ?", [res3[0].id, response.employee], (err, res4) => {
+                            if (err) throw err;
+                            console.log(`Employee Updated`);
+                            viewEmployees();
+                        });
+
+                    });
+                })
+        });
+    });
+
+
+
+
+    // Get a list of current employees
+    // Get a list of current roles
+    // Ask for the desired employee
+    // Ask for the desired role
+    // Update the table where ....
 }
 
 
