@@ -65,7 +65,7 @@ const menu = () => {
                     addRole();
                     break;
                 case "Add an Employee":
-                    // Call the function
+                    addEmployee();
                     break;
                 case "Update an employee's role":
                     // Call the function
@@ -108,7 +108,8 @@ const viewDepartments = () => {
 
 // Function to view all roles
 const viewRoles = () => {
-    const query = "SELECT * FROM role";
+    let query = "SELECT a.id, a.title, a.salary, b.name FROM role a "
+    query += "INNER JOIN department b ON a.department_id = b.id";
     connection.query(query, (err, res) => {
         console.table('Company Roles:', res);
         pauseMenu();
@@ -117,7 +118,11 @@ const viewRoles = () => {
 
 // Function to view all employees
 const viewEmployees = () => {
-    const query = "SELECT * FROM employee";
+    let query = "SELECT a.id, a.first_name, a.last_name, b.title, c.name AS 'department', b.salary, CONCAT(d.first_name, ' ',d.last_name) as 'manager' FROM employee a ";
+    query += "INNER JOIN role b ON a.role_id = b.id ";
+    query += "INNER JOIN department c ON b.department_id = c.id ";
+    query += "LEFT JOIN employee d ON a.manager_id = d.id";
+
     connection.query(query, (err, res) => {
         console.table('Company Employees:', res);
         pauseMenu();
@@ -218,7 +223,16 @@ const addRole = () => {
 };
 
 // Function to add an employee
-
+const addEmployee = () => {
+    // Get list of current roles
+    // Get list of current employees for managers - start with none
+    // Ask for first and last name
+    // Pick from list for role title
+    // Pick from list for manager name
+    // Get the role title id
+    // Get the manager employee id
+    // Add this record to the employee table
+}
 
 // Function to update employee roles
 
