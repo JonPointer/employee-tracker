@@ -4,7 +4,7 @@
 
 ## Description
 
-A content management system written in node.js connected to a mysql database. Functions include ability to display and add departments, roles, and employess, and modify an employee's role.
+A content management system written in node.js connected to a mysql database. Functions include ability to display and add departments, roles, and employees, and modify an employee's role.
 
 ## Table of Contents
 
